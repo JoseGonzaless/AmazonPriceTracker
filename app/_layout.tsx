@@ -12,10 +12,10 @@ export const unstable_settings = {
 export default function RootLayout() {
   return (
     <AuthContextProvider>
-        <Stack>
-      <Stack.Screen name="(app)/(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(app)/modal" options={{ presentation: 'modal' }} />
-    </Stack>
+      <Stack>
+        <Stack.Screen name="(app)/(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(app)/modal" options={{ presentation: 'modal' }} />
+      </Stack>
     </AuthContextProvider>
   );
 }
