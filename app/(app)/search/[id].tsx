@@ -4,13 +4,14 @@ import { Text, View, FlatList, Image, Pressable, Linking, ActivityIndicator, Tou
 import { supabase } from "~/utils/supabase";
 import dayjs from "dayjs";
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { Tables } from "~/types/supabase";
 
 dayjs.extend(relativeTime);
 
 export default function SearchResultScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
-    const[search, setSearch] = useState();
-    const [products, setProducts] = useState([]);
+    const[search, setSearch] = useState<Tables<'searches'> | null>(null);
+    const [products, setProducts] = useState<Tables<'products'>[]>([]);
 
     useEffect(() => {
         fetchSearch();
@@ -23,7 +24,7 @@ export default function SearchResultScreen() {
             .select('*')
             .eq('id', id)
             .single()
-            .then(({data}) => setSearch(data));
+            .then(({ data }) => setSearch(data));
     };
 
     const fetchProducts = () => {
@@ -32,9 +33,9 @@ export default function SearchResultScreen() {
             .select('*, products(*)')
             .eq('search_id', id)
             .then(({ data, error }) => {
-                console.log(data, error);
-                setProducts(data?.map((d) => d.products));
-        });
+                setProducts(data?.map((d) => d.products).filter((p) => !!p) as Tables<'products'>[]);
+            }
+        );
     };
 
     useEffect(() => {
@@ -52,7 +53,9 @@ export default function SearchResultScreen() {
             )
             .subscribe();
 
-        return () => subscription.unsubscribe();
+        return () => {
+            subscription.unsubscribe()
+        };
     }, []);
 
     const startScraping = async () => {

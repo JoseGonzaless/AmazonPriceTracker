@@ -3,20 +3,25 @@ import { Link, router, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {Text, View, TextInput, Pressable, FlatList } from 'react-native';
 import { useAuth } from '~/app/contexts/AuthContext';
+import { Tables } from '~/types/supabase';
 import { supabase } from '~/utils/supabase';
 
 export default function Home() {
   const [search, setSearch] = useState('');
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<Tables<'searches'>[]>([]);
   const { user } = useAuth();
 
   const fetchHistory = () => {
+    if (!user) {
+      return;
+    }
+
     supabase
       .from('searches')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .then(({data}) => setHistory(data));
+      .then(({data}) => setHistory(data || []));
   };
 
   useEffect(() => {
@@ -24,6 +29,10 @@ export default function Home() {
   }, []);
   
   const performSearch = async () => {
+    if (!user) {
+      return;
+    }
+
     //save this search in database
     const {data, error} = await supabase.from('searches').insert({
       query: search,
@@ -36,7 +45,7 @@ export default function Home() {
       router.push(`/search/${data.id}`);
     }
 
-    //scrape amazon for this queryS
+    //scrape amazon for this query
   };
 
   return (
